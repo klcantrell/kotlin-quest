@@ -3,9 +3,9 @@ package com.example.ageinminutes
 import android.app.DatePickerDialog
 import android.os.Bundle
 import android.view.View
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.ageinminutes.databinding.ActivityMainBinding
+import java.text.SimpleDateFormat
 import java.util.*
 
 class MainActivity : AppCompatActivity() {
@@ -26,9 +26,24 @@ class MainActivity : AppCompatActivity() {
         val month = calendar.get(Calendar.MONTH)
         val dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH)
 
-        DatePickerDialog(this, { datePickerView, selectedYear, selectedMonth, selectedDayOfMonth ->
-            Toast.makeText(this, "Date picker works!", Toast.LENGTH_LONG).show()
-        }, year, month, dayOfMonth).show()
+        val datePickerDialog = DatePickerDialog(
+            this,
+            { datePickerView, selectedYear, selectedMonth, selectedDayOfMonth ->
+                val formatter = SimpleDateFormat("MM/dd/yyyy", Locale.US)
+                val date =
+                    formatter.parse("${selectedMonth + 1}/$selectedDayOfMonth/$selectedYear")!!
+                val selectedDateInMinutes = date.time / 60_000
+                val currentDateInMinutes = Date().time / 60_000
+                binding.tvSelectedDate.text = formatter.format(date)
+                binding.tvSelectedDateInMinutes.text =
+                    (currentDateInMinutes - selectedDateInMinutes).toString()
+            },
+            year,
+            month,
+            dayOfMonth
+        )
 
+        datePickerDialog.datePicker.maxDate = Date().time.minus(86400000)
+        datePickerDialog.show()
     }
 }
