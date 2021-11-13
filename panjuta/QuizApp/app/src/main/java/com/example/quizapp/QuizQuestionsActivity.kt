@@ -1,5 +1,6 @@
 package com.example.quizapp
 
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
@@ -16,12 +17,15 @@ class QuizQuestionsActivity : AppCompatActivity() {
     private var currentQuestionPosition = 1
     private var questionsList = Constants.getQuestions()
     private var selectedOptionPosition = 0
+    private var correctAnswers = 0
+    private var userName: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityQuizQuestionsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        userName = intent.getStringExtra(Constants.USER_NAME)
         setQuestion()
         bindEventHandlers()
     }
@@ -63,11 +67,12 @@ class QuizQuestionsActivity : AppCompatActivity() {
                         }
                         else -> {
                             currentQuestionAnswered = true
-                            Toast.makeText(
-                                this,
-                                "You have successfully completed the quiz!",
-                                Toast.LENGTH_SHORT,
-                            ).show()
+                            val intent = Intent(this, ResultActivity::class.java)
+                            intent.putExtra(Constants.USER_NAME, userName)
+                            intent.putExtra(Constants.CORRECT_ANSWERS, correctAnswers)
+                            intent.putExtra(Constants.TOTAL_QUESTIONS, questionsList.size)
+                            startActivity(intent)
+                            finish()
                         }
                     }
                 } else {
@@ -82,6 +87,8 @@ class QuizQuestionsActivity : AppCompatActivity() {
                             ).show()
                         }
                         answerView(selectedOptionPosition, R.drawable.wrong_option_border_bg)
+                    } else {
+                        correctAnswers += 1
                     }
                     answerView(question.correctAnswer, R.drawable.correct_option_border_bg)
 
