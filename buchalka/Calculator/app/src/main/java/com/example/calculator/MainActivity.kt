@@ -6,6 +6,9 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import com.example.calculator.Constants.SAVED_OPERAND_1
+import com.example.calculator.Constants.SAVED_OPERAND_1_STORED
+import com.example.calculator.Constants.SAVED_PENDING_OPERATION
 
 class MainActivity : AppCompatActivity() {
     private val result by lazy(LazyThreadSafetyMode.NONE) {
@@ -19,7 +22,6 @@ class MainActivity : AppCompatActivity() {
     }
 
     private var operand1: Double? = null
-    private var operand2: Double = 0.0
     private var pendingOperation = "="
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -63,9 +65,11 @@ class MainActivity : AppCompatActivity() {
 
         val onOperationButtonClicked: ((View) -> Unit) = { v ->
             val operation = (v as Button).text.toString()
-            val value = newNumber.text.toString()
-            if (value.isNotEmpty()) {
+            try {
+                val value = newNumber.text.toString().toDouble()
                 performOperation(value, operation)
+            } catch (e: NumberFormatException) {
+                newNumber.setText("")
             }
             pendingOperation = operation
             displayOperation.text = pendingOperation
@@ -78,28 +82,47 @@ class MainActivity : AppCompatActivity() {
         buttonPlus.setOnClickListener(onOperationButtonClicked)
     }
 
-    private fun performOperation(value: String, operation: String) {
-        if (operand1 == null) {
-            operand1 = value.toDouble()
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        pendingOperation = savedInstanceState.getString(SAVED_PENDING_OPERATION, "")
+        displayOperation.text = pendingOperation
+        operand1 = if (savedInstanceState.getBoolean(SAVED_OPERAND_1_STORED)) {
+            savedInstanceState.putBoolean(SAVED_OPERAND_1_STORED, false)
+            savedInstanceState.getDouble(SAVED_OPERAND_1)
         } else {
-            operand2 = value.toDouble()
+            null
+        }
+    }
 
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(SAVED_PENDING_OPERATION, pendingOperation)
+        operand1?.let {
+            outState.putDouble(SAVED_OPERAND_1, it)
+            outState.putBoolean(SAVED_OPERAND_1_STORED, true)
+        }
+    }
+
+    private fun performOperation(value: Double, operation: String) {
+        if (operand1 == null) {
+            operand1 = value
+        } else {
             if (pendingOperation == "=") {
                 pendingOperation = operation
             }
 
             when (pendingOperation) {
-                "=" -> operand1 = operand2
+                "=" -> operand1 = value
                 "/" -> {
-                    if (operand2 == 0.0) {
-                        operand1 = Double.NaN
+                    operand1 = if (value == 0.0) {
+                        Double.NaN
                     } else {
-                        operand1 = operand1!! / operand2
+                        operand1!! / value
                     }
                 }
-                "*" -> operand1 = operand1!! * operand2
-                "-" -> operand1 = operand1!! - operand2
-                "+" -> operand1 = operand1!! + operand2
+                "*" -> operand1 = operand1!! * value
+                "-" -> operand1 = operand1!! - value
+                "+" -> operand1 = operand1!! + value
             }
         }
 
