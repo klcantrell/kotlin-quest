@@ -54,6 +54,21 @@ class MainActivity : AppCompatActivity() {
         binding.buttonMultiply.setOnClickListener(onOperationButtonClicked)
         binding.buttonMinus.setOnClickListener(onOperationButtonClicked)
         binding.buttonPlus.setOnClickListener(onOperationButtonClicked)
+
+        val onNegButtonClicked: ((View) -> Unit) = {
+            val value = binding.newNumber.text.toString()
+            if (value.isEmpty()) {
+                binding.newNumber.setText("-")
+            } else {
+                try {
+                    binding.newNumber.setText(value.toDouble().unaryMinus().toString())
+                } catch (e: NumberFormatException) {
+                    binding.newNumber.setText("")
+                }
+            }
+        }
+
+        binding.buttonNeg.setOnClickListener(onNegButtonClicked)
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
