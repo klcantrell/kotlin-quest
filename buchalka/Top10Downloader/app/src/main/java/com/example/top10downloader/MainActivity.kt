@@ -4,9 +4,7 @@ import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import java.io.BufferedReader
 import java.io.IOException
-import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -49,26 +47,21 @@ class MainActivity : AppCompatActivity() {
                     val connection = url.openConnection() as HttpURLConnection
                     val responseCode = connection.responseCode
                     Log.d(TAG, "downloadXML: The response code was $responseCode")
-                    val reader = BufferedReader(InputStreamReader(connection.inputStream))
-                    val inputBuffer = CharArray(500)
-                    var charsRead = 0
-                    while (charsRead >= 0) {
-                        charsRead = reader.read(inputBuffer)
-                        if (charsRead > 0) {
-                            result.append(String(inputBuffer, 0, charsRead))
-                        }
+
+                    connection.inputStream.buffered().reader().use {
+                        result.append(it.readText())
                     }
-                    reader.close()
+
                     Log.d(TAG, "Received ${result.length} bytes")
                     return result.toString()
-                } catch (e: MalformedURLException) {
-                    Log.e(TAG, "downloadXML: Invalid URL ${e.message}")
-                } catch (e: IOException) {
-                    Log.e(TAG, "downloadXML: IOException reading data ${e.message}")
-                } catch (e: SecurityException) {
-                    Log.e(TAG, "downloadXML: SecurityException. Needs permission? ${e.message}")
                 } catch (e: Exception) {
-                    Log.e(TAG, "downloadXML: Unknown error ${e.message}")
+                    val errorMessage: String = when (e) {
+                        is MalformedURLException -> "downloadXML: Invalid URL ${e.message}"
+                        is IOException -> "downloadXML: IO Exception reading data ${e.message}"
+                        is SecurityException -> "downloadXML: Security exception. Needs permission? ${e.message}"
+                        else -> "Unknown error ${e.message}"
+                    }
+                    Log.e(TAG, errorMessage)
                 }
 
                 return ""
