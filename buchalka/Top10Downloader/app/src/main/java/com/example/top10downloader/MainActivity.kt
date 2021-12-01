@@ -1,70 +1,87 @@
 package com.example.top10downloader
 
+import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.widget.ArrayAdapter
+import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
-import java.io.IOException
-import java.net.HttpURLConnection
-import java.net.MalformedURLException
+import com.example.top10downloader.databinding.ActivityMainBinding
 import java.net.URL
+import kotlin.properties.Delegates
+
+class FeedEntry {
+    var name: String = ""
+    var artist: String = ""
+    var releaseDate: String = ""
+    var summary: String = ""
+    var imageURL: String = ""
+
+    override fun toString(): String {
+        return """
+            name = $name
+            artist = $artist
+            releaseDate = $releaseDate
+            imageURL = $imageURL
+        """.trimIndent()
+    }
+}
 
 class MainActivity : AppCompatActivity() {
-    private val TAG = "MainActivity"
+    private lateinit var binding: ActivityMainBinding
+
+    private val tag = "MainActivity"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        Log.d(TAG, "onCreate called")
-        val downloadData = DownloadData()
+        Log.d(tag, "onCreate called")
+        val downloadData = DownloadData(this, binding.xmlListView)
         downloadData.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml")
-        Log.d(TAG, "onCreate done")
+        Log.d(tag, "onCreate done")
     }
 
     companion object {
-        private class DownloadData : AsyncTask<String, Void, String>() {
-            private val TAG = "DownloadData"
+        private class DownloadData(context: Context, listView: ListView) :
+            AsyncTask<String, Void, String>() {
+            private val tag = "DownloadData"
 
-            override fun onPostExecute(result: String?) {
+            var propContext: Context by Delegates.notNull()
+            var propListView: ListView by Delegates.notNull()
+
+            init {
+                propContext = context
+                propListView = listView
+            }
+
+            override fun onPostExecute(result: String) {
                 super.onPostExecute(result)
-                Log.d(TAG, "onPostExecute: parameter is $result")
+                Log.d(tag, "onPostExecute: parameter is $result")
+                val parseApplications = ParseApplications()
+                parseApplications.parse(result)
+
+                val arrayAdapter = ArrayAdapter(
+                    propContext,
+                    R.layout.list_item,
+                    parseApplications.applications
+                )
+                propListView.adapter = arrayAdapter
             }
 
             override fun doInBackground(vararg params: String?): String {
-                Log.d(TAG, "doInBackground starts with: ${params[0]}")
+                Log.d(tag, "doInBackground starts with: ${params[0]}")
                 val rssFeed = downloadXML(params[0])
                 if (rssFeed.isEmpty()) {
-                    Log.d(TAG, "doInBackground: Error downloading")
+                    Log.d(tag, "doInBackground: Error downloading")
                 }
                 return rssFeed
             }
 
             private fun downloadXML(urlPath: String?): String {
-                val result = StringBuilder()
-                try {
-                    val url = URL(urlPath)
-                    val connection = url.openConnection() as HttpURLConnection
-                    val responseCode = connection.responseCode
-                    Log.d(TAG, "downloadXML: The response code was $responseCode")
-
-                    connection.inputStream.buffered().reader().use {
-                        result.append(it.readText())
-                    }
-
-                    Log.d(TAG, "Received ${result.length} bytes")
-                    return result.toString()
-                } catch (e: Exception) {
-                    val errorMessage: String = when (e) {
-                        is MalformedURLException -> "downloadXML: Invalid URL ${e.message}"
-                        is IOException -> "downloadXML: IO Exception reading data ${e.message}"
-                        is SecurityException -> "downloadXML: Security exception. Needs permission? ${e.message}"
-                        else -> "Unknown error ${e.message}"
-                    }
-                    Log.e(TAG, errorMessage)
-                }
-
-                return ""
+                return URL(urlPath).readText()
             }
         }
     }
