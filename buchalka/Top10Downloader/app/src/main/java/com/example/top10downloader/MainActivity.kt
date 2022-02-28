@@ -33,15 +33,21 @@ class MainActivity : AppCompatActivity() {
 
     private val tag = "MainActivity"
 
+    private val downloadData by lazy { DownloadData(this, binding.xmlListView) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         Log.d(tag, "onCreate called")
-        val downloadData = DownloadData(this, binding.xmlListView)
         downloadData.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml")
         Log.d(tag, "onCreate done")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        downloadData.cancel(true)
     }
 
     companion object {
@@ -63,12 +69,8 @@ class MainActivity : AppCompatActivity() {
                 val parseApplications = ParseApplications()
                 parseApplications.parse(result)
 
-                val arrayAdapter = ArrayAdapter(
-                    propContext,
-                    R.layout.list_item,
-                    parseApplications.applications
-                )
-                propListView.adapter = arrayAdapter
+                val feedAdapter = FeedAdapter(propContext, R.layout.list_record, parseApplications.applications)
+                propListView.adapter = feedAdapter
             }
 
             override fun doInBackground(vararg params: String?): String {
