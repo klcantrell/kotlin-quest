@@ -4,6 +4,8 @@ import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
+import android.view.Menu
+import android.view.MenuItem
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.top10downloader.databinding.ActivityMainBinding
@@ -30,23 +32,46 @@ class FeedEntry {
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    private val tag = "MainActivity"
+    private val TAG = "MainActivity"
 
-    private val downloadData by lazy { DownloadData(this, binding.xmlListView) }
+    private var downloadData: DownloadData? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        Log.d(tag, "onCreate called")
-        downloadData.execute("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml")
-        Log.d(tag, "onCreate done")
+        downloadUrl("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml")
+        Log.d(TAG, "onCreate: done")
+    }
+
+    private fun downloadUrl(feedUrl: String) {
+        Log.d(TAG, "downloadUrl starting AsyncTask")
+        downloadData = DownloadData(this, binding.xmlListView)
+        downloadData?.execute(feedUrl)
+        Log.d(TAG, "downloadUrl done")
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.feeds_menu, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val feedUrl: String = when (item.itemId) {
+            R.id.mnuFree -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml"
+            R.id.mnuPaid -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=10/xml"
+            R.id.mnuSongs -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=10/xml"
+            else -> return super.onOptionsItemSelected(item)
+        }
+
+        downloadUrl(feedUrl)
+        return true
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        downloadData.cancel(true)
+        downloadData?.cancel(true)
     }
 
     companion object {
