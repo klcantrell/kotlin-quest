@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.AsyncTask
 import android.os.Bundle
 import android.util.Log
-import android.widget.ArrayAdapter
 import android.widget.ListView
 import androidx.appcompat.app.AppCompatActivity
 import com.example.top10downloader.databinding.ActivityMainBinding
@@ -69,7 +68,8 @@ class MainActivity : AppCompatActivity() {
                 val parseApplications = ParseApplications()
                 parseApplications.parse(result)
 
-                val feedAdapter = FeedAdapter(propContext, R.layout.list_record, parseApplications.applications)
+                val feedAdapter =
+                    FeedAdapter(propContext, R.layout.list_record, parseApplications.applications)
                 propListView.adapter = feedAdapter
             }
 
