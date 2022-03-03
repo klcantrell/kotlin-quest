@@ -36,13 +36,26 @@ class MainActivity : AppCompatActivity() {
 
     private var downloadData: DownloadData? = null
 
+    private var feedUrl: String =
+        "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=%d/xml"
+    private var feedLimit: Int = 10
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        downloadUrl("http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml")
-        Log.d(TAG, "onCreate: done")
+        Log.d(TAG, "onCreate() called")
+        if (savedInstanceState != null) {
+            val savedFeedUrl = savedInstanceState.getString(Constants.SAVED_FEED_URL, "")
+            val savedFeedLimit = savedInstanceState.getInt(Constants.SAVED_FEED_LIMIT, 0)
+            if (savedFeedUrl.isNotEmpty() && savedFeedLimit > 0) {
+                feedUrl = savedFeedUrl
+                feedLimit = savedFeedLimit
+            }
+        }
+        downloadUrl(feedUrl.format(feedLimit))
+        Log.d(TAG, "onCreate(): done")
     }
 
     private fun downloadUrl(feedUrl: String) {
@@ -54,24 +67,66 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.feeds_menu, menu)
+        if (feedLimit == 10) {
+            menu.findItem(R.id.mnu10).isChecked = true
+        } else {
+            menu.findItem(R.id.mnu25).isChecked = true
+        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        val feedUrl: String = when (item.itemId) {
-            R.id.mnuFree -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=10/xml"
-            R.id.mnuPaid -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=10/xml"
-            R.id.mnuSongs -> "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=10/xml"
+        var selectedFeedUrl = feedUrl
+        val previousFeedLimit = feedLimit
+        when (item.itemId) {
+            R.id.mnuFree -> {
+                selectedFeedUrl =
+                    "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topfreeapplications/limit=%d/xml"
+            }
+            R.id.mnuPaid -> {
+                selectedFeedUrl =
+                    "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/toppaidapplications/limit=%d/xml"
+            }
+            R.id.mnuSongs -> {
+                selectedFeedUrl =
+                    "http://ax.itunes.apple.com/WebObjects/MZStoreServices.woa/ws/RSS/topsongs/limit=%d/xml"
+            }
+            R.id.mnu10, R.id.mnu25 ->
+                if (!item.isChecked) {
+                    item.isChecked = true
+                    feedLimit = 35 - feedLimit
+                    Log.d(
+                        TAG,
+                        "onOptionsItemSelected: ${item.title} setting feedLimit to $feedLimit"
+                    )
+                } else {
+                    Log.d(
+                        TAG,
+                        "onOptionsItemSelected: ${item.title} setting feedLimit to $feedLimit"
+                    )
+                }
+            R.id.mnuRefresh -> {
+                downloadUrl(feedUrl.format(feedLimit))
+            }
             else -> return super.onOptionsItemSelected(item)
         }
 
-        downloadUrl(feedUrl)
+        if (selectedFeedUrl != feedUrl || previousFeedLimit != feedLimit) {
+            feedUrl = selectedFeedUrl
+            downloadUrl(feedUrl.format(feedLimit))
+        }
         return true
     }
 
     override fun onDestroy() {
         super.onDestroy()
         downloadData?.cancel(true)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(Constants.SAVED_FEED_URL, feedUrl)
+        outState.putInt(Constants.SAVED_FEED_LIMIT, feedLimit)
     }
 
     companion object {
@@ -112,4 +167,9 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+}
+
+object Constants {
+    const val SAVED_FEED_URL = "SAVED_FEED_URL"
+    const val SAVED_FEED_LIMIT = "SAVED_FEED_LIMIT"
 }
