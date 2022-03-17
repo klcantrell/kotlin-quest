@@ -12,6 +12,7 @@
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		48B080A5DF19BD909DF55A5B /* Pods_iosApp.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F51A5444205B67BE26C02C9 /* Pods_iosApp.framework */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
+		E54D59FE27E1790D00A8D84C /* CharacterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E54D59FD27E1790D00A8D84C /* CharacterView.swift */; };
 		E5CA531C27DED21500772938 /* SwApiViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = E5CA531B27DED21500772938 /* SwApiViewModel.swift */; };
 /* End PBXBuildFile section */
 
@@ -25,6 +26,7 @@
 		7555FF82242A565900829871 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		7555FF8C242A565B00829871 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		CEB7A0BB840260C24DD7235E /* Pods-iosApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-iosApp.debug.xcconfig"; path = "Target Support Files/Pods-iosApp/Pods-iosApp.debug.xcconfig"; sourceTree = "<group>"; };
+		E54D59FD27E1790D00A8D84C /* CharacterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CharacterView.swift; sourceTree = "<group>"; };
 		E5CA531B27DED21500772938 /* SwApiViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwApiViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -75,6 +77,7 @@
 				2152FB032600AC8F00CF470E /* iOSApp.swift */,
 				058557D7273AAEEB004C7B11 /* Preview Content */,
 				E5CA531B27DED21500772938 /* SwApiViewModel.swift */,
+				E54D59FD27E1790D00A8D84C /* CharacterView.swift */,
 			);
 			path = iosApp;
 			sourceTree = "<group>";
@@ -194,6 +197,7 @@
 			files = (
 				2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */,
 				7555FF83242A565900829871 /* ContentView.swift in Sources */,
+				E54D59FE27E1790D00A8D84C /* CharacterView.swift in Sources */,
 				E5CA531C27DED21500772938 /* SwApiViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

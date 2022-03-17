@@ -17,6 +17,10 @@ class SwApi {
         }
     }
 
+    suspend fun getAllCharacters(): ApiCharacterList {
+        return httpClient.get("${Constants.BASE_API_URL}/people")
+    }
+
     suspend fun getCharacterById(characterId: String): ApiCharacter {
         return httpClient.get("${Constants.BASE_API_URL}/people/${characterId}")
     }
