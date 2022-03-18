@@ -5,19 +5,25 @@ import Common
 class SwApiViewModel: ObservableObject {
     @Published var state = SwApiUiState.idle
     
-    private var characterCount: Int32 = 0
-    private var characterData: [String : Character] = [:]
+    var characterCount: Int {
+        return Int(swapiService.getCharacterCount())
+    }
+    
+    func getCharacter(_ characterId: String) -> Character? {
+        return swapiService.getCharacterById(characterId: characterId)
+    }
+    
     private var loadingCharacter = false
     
-    private let repository = SwApiRepository()
+    private let swapiService = SwApiService()
     
     init() {
         state = SwApiUiState.loading
-        repository.getInitialData { result, error in
-            if let swapiData = result {
-                self.characterCount = swapiData.characterCount
-                self.characterData = swapiData.characterData
-                self.state = SwApiUiState.success(swapiData)
+        swapiService.loadInitialData { result, error in
+            if result != nil && error == nil  {
+                self.state = .loaded
+            } else {
+                self.state = .error
             }
         }
     }
@@ -25,35 +31,13 @@ class SwApiViewModel: ObservableObject {
     func loadCharacter(_ characterId: String) {
         if !loadingCharacter {
             loadingCharacter = true
-            if self.characterData[characterId] == nil && !state.isLoading {
-                print("fetching \(characterId)")
-                state = SwApiUiState.fetchingNewCharacter(
-                    SwapiData(
-                        characterCount: self.characterCount,
-                        characterData: self.characterData
-                    )
-                )
-                repository.getCharacterById(characterId: characterId) { result, error in
-                    if error == nil, let character = result {
-                        self.characterData[character.id] = character
-                        self.state = SwApiUiState.success(
-                            SwapiData(
-                                characterCount: self.characterCount,
-                                characterData: self.characterData
-                            )
-                        )
+            if swapiService.getCharacterById(characterId: characterId) == nil && !state.isLoading {
+                state = .fetchingNewCharacter
+                swapiService.loadCharacterById(characterId: characterId) { result, error in
+                    if result != nil && error == nil {
+                        self.state = .loaded
                     } else {
-                        self.characterData[characterId] = Character(
-                            id: characterId,
-                            name: "Could not load this character, please try again later",
-                            appearsIn: []
-                        )
-                        self.state = SwApiUiState.success(
-                            SwapiData(
-                                characterCount: self.characterCount,
-                                characterData: self.characterData
-                            )
-                        )
+                        self.state = .error
                     }
                 }
             }
@@ -65,12 +49,13 @@ class SwApiViewModel: ObservableObject {
 enum SwApiUiState {
     case idle
     case loading
-    case fetchingNewCharacter(SwapiData)
-    case success(SwapiData)
+    case fetchingNewCharacter
+    case loaded
+    case error
     
     var isLoading: Bool {
         switch self {
-        case .loading, .fetchingNewCharacter(_): return true
+        case .loading, .fetchingNewCharacter: return true
         default: return false
         }
     }

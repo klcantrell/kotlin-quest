@@ -26,7 +26,10 @@ fun MainLayout(viewModel: SwApiViewModel) {
             ) {
                 when (state) {
                     is SwApiUiState.Idle, is SwApiUiState.Loading -> Text("Loading...")
-                    is SwApiUiState.Success -> Text((state as SwApiUiState.Success).character.name)
+                    is SwApiUiState.Loaded -> Text(
+                        viewModel.currentCharacter?.name
+                            ?: "Could not load this character, try again later."
+                    )
                 }
             }
         }
