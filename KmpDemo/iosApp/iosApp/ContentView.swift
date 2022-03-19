@@ -11,11 +11,13 @@ struct ContentView: View {
         case .fetchingNewCharacter, .loaded:
             TabView {
                 ForEach(1..<viewModel.characterCount) { id in
-                    CharacterView(characterId: String(id))
-                        .onAppear {
+                    CharacterView(
+                        state: viewModel.state,
+                        character: viewModel.getCharacter(String(id)),
+                        onAppear: {
                             viewModel.loadCharacter(String(id))
                         }
-                        .environmentObject(viewModel)
+                    )
                 }
             }
             .tabViewStyle(.page)

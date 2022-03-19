@@ -1,18 +1,20 @@
 import SwiftUI
+import Common
 
 struct CharacterView: View {
-    @EnvironmentObject var viewModel: SwApiViewModel
-    
-    let characterId: String
+    let state: SwApiUiState
+    let character: Character?
+    let onAppear: () -> Void
     
     var body: some View {
         HStack {
-            switch viewModel.state {
+            switch state {
             case .idle, .loading, .fetchingNewCharacter : Text("Loading next character...")
             case .error: Text("Ah, something went wrong. Try again later.")
             case .loaded:
-                Text(viewModel.getCharacter(characterId)?.name ?? "Could not load this character, try again later.")
+                Text(character?.name ?? "Could not load this character, try again later.")
             }
         }
+        .onAppear { onAppear() }
     }
 }
