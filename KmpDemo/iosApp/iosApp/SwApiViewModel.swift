@@ -13,8 +13,6 @@ class SwApiViewModel: ObservableObject {
         return swapiService.getCharacterById(characterId: characterId)
     }
     
-    private var loadingCharacter = false
-    
     private let swapiService = SwApiService()
     
     init() {
@@ -29,19 +27,18 @@ class SwApiViewModel: ObservableObject {
     }
     
     func loadCharacter(_ characterId: String) {
-        if !loadingCharacter {
-            loadingCharacter = true
-            if swapiService.getCharacterById(characterId: characterId) == nil && !state.isLoading {
-                state = .fetchingNewCharacter
-                swapiService.loadCharacterById(characterId: characterId) { result, error in
-                    if result != nil && error == nil {
-                        self.state = .loaded
-                    } else {
-                        self.state = .error
-                    }
+        if getCharacter(characterId) != nil {
+            return
+        }
+        if !state.isLoading {
+            state = .fetchingNewCharacter
+            swapiService.loadCharacterById(characterId: characterId) { result, error in
+                if result != nil && error == nil {
+                    self.state = .loaded
+                } else {
+                    self.state = .error
                 }
             }
-            loadingCharacter = false
         }
     }
 }

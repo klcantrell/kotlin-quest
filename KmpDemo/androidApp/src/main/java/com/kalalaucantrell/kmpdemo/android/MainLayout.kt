@@ -1,8 +1,7 @@
 package com.kalalaucantrell.kmpdemo.android
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -12,6 +11,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.kalalaucantrell.kmpdemo.android.SwApiUiState.*
 
 @Composable
 fun MainLayout(viewModel: SwApiViewModel) {
@@ -25,11 +26,24 @@ fun MainLayout(viewModel: SwApiViewModel) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (state) {
-                    is SwApiUiState.Idle, is SwApiUiState.Loading -> Text("Loading...")
-                    is SwApiUiState.Loaded -> Text(
-                        viewModel.currentCharacter?.name
-                            ?: "Could not load this character, try again later."
-                    )
+                    IDLE, LOADING -> Text("Loading...")
+                    ERROR -> Text("Ah, something went wrong. Try again later.")
+                    FETCHING_NEW_CHARACTER, LOADED ->
+                        Column {
+                            Text(
+                                viewModel.getCharacter()?.name
+                                    ?: "Could not load this character, try again later.",
+                            )
+                            Spacer(modifier = Modifier.size(10.dp))
+                            Button(
+                                onClick = {
+                                    viewModel.currentCharacter += 1
+                                    viewModel.loadCharacter(viewModel.currentCharacter.toString())
+                                }
+                            ) {
+                                Text("Next character")
+                            }
+                        }
                 }
             }
         }

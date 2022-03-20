@@ -38,4 +38,5 @@ dependencies {
     implementation("androidx.activity:activity-compose:${properties["version.activityCompose"]}")
     implementation("androidx.compose.material:material:${properties["version.compose"]}")
     implementation("androidx.compose.ui:ui-tooling:${properties["version.compose"]}")
+    implementation("com.google.accompanist:accompanist-pager:${properties["version.accompanist"]}")
 }
