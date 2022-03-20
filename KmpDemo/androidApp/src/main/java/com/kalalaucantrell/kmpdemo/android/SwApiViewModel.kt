@@ -9,46 +9,53 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
 class SwApiViewModel : ViewModel() {
-    val uiState: MutableStateFlow<SwApiUiState> = MutableStateFlow(IDLE)
-    var currentCharacter = 1
+    val uiState: MutableStateFlow<SwApiUiState> = MutableStateFlow(Idle())
 
-    fun getCharacter(): Character? {
-        return swapiService.getCharacterById(currentCharacter.toString())
+    val characterCount: Int
+        get() = swapiService.getCharacterCount()
+
+    fun getCharacter(characterId: String): Character? {
+        return swapiService.getCharacterById(characterId)
     }
 
     private val swapiService = SwApiService()
 
     init {
-        loadInitialData(currentCharacter.toString())
+        loadInitialData()
     }
 
-    private fun loadInitialData(characterId: String) {
+    private fun loadInitialData() {
+        uiState.value = Loading()
         viewModelScope.launch {
-            uiState.value = LOADING
-            swapiService.loadCharacterById(characterId)
-            uiState.value = LOADED
+            swapiService.loadInitialData()
+            uiState.value = Loaded()
         }
     }
 
     fun loadCharacter(characterId: String) {
-        viewModelScope.launch {
-            uiState.value = LOADING
-            swapiService.loadCharacterById(characterId)
-            uiState.value = LOADED
+        if (getCharacter(characterId) != null) {
+            return
+        }
+        if (!uiState.value.isLoading) {
+            uiState.value = FetchingNewCharacter(characterId)
+            viewModelScope.launch {
+                swapiService.loadCharacterById(characterId)
+                uiState.value = Loaded()
+            }
         }
     }
 }
 
-enum class SwApiUiState {
-    IDLE,
-    LOADING,
-    FETCHING_NEW_CHARACTER,
-    LOADED,
-    ERROR;
+sealed class SwApiUiState {
+    data class Idle(val idle: Boolean = true) : SwApiUiState()
+    class Loading(val loading: Boolean = true) : SwApiUiState()
+    data class FetchingNewCharacter(val characterId: String) : SwApiUiState()
+    data class Loaded(val loaded: Boolean = true) : SwApiUiState()
+    data class Error(val error: Boolean = true) : SwApiUiState()
 
     val isLoading: Boolean
         get() = when (this) {
-            LOADING, FETCHING_NEW_CHARACTER -> true
+            is Loading, is FetchingNewCharacter -> true
             else -> false
         }
 }

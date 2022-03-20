@@ -40,3 +40,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling:${properties["version.compose"]}")
     implementation("com.google.accompanist:accompanist-pager:${properties["version.accompanist"]}")
 }
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
+}

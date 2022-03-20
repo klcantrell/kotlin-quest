@@ -9,10 +9,18 @@ struct CharacterView: View {
     var body: some View {
         HStack {
             switch state {
-            case .idle, .loading, .fetchingNewCharacter : Text("Loading next character...")
+            case .idle, .loading : Text("Loading next character...")
+            case .fetchingNewCharacter(let characterId) :
+                if character?.name != nil && characterId != character!.id {
+                    Text(character!.name)
+                } else {
+                    Text("Loading next character...")
+                }
             case .error: Text("Ah, something went wrong. Try again later.")
             case .loaded:
-                Text(character?.name ?? "Could not load this character, try again later.")
+                Text(
+                    character?.name ?? "Could not load this character, try again later."
+                )
             }
         }
         .onAppear { onAppear() }

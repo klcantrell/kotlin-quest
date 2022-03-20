@@ -31,7 +31,7 @@ class SwApiViewModel: ObservableObject {
             return
         }
         if !state.isLoading {
-            state = .fetchingNewCharacter
+            state = .fetchingNewCharacter(characterId)
             swapiService.loadCharacterById(characterId: characterId) { result, error in
                 if result != nil && error == nil {
                     self.state = .loaded
@@ -46,7 +46,7 @@ class SwApiViewModel: ObservableObject {
 enum SwApiUiState {
     case idle
     case loading
-    case fetchingNewCharacter
+    case fetchingNewCharacter(String)
     case loaded
     case error
     
