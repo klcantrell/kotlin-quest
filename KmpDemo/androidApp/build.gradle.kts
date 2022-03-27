@@ -39,6 +39,7 @@ dependencies {
     implementation("androidx.compose.material:material:${properties["version.compose"]}")
     implementation("androidx.compose.ui:ui-tooling:${properties["version.compose"]}")
     implementation("com.google.accompanist:accompanist-pager:${properties["version.accompanist"]}")
+    implementation("io.coil-kt:coil-compose:${properties["version.coil"]}")
 }
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {

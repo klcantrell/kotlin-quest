@@ -18,6 +18,10 @@ class SwApiViewModel : ViewModel() {
         return swapiService.getCharacterById(characterId)
     }
 
+    private fun characterFailedToFetch(characterId: String): Boolean {
+        return swapiService.characterFailedToFetch(characterId)
+    }
+
     private val swapiService = SwApiService()
 
     init {
@@ -25,22 +29,29 @@ class SwApiViewModel : ViewModel() {
     }
 
     private fun loadInitialData() {
-        uiState.value = Loading()
+        uiState.value = Initializing()
         viewModelScope.launch {
-            swapiService.loadInitialData()
-            uiState.value = Loaded()
+            try {
+                swapiService.loadInitialData()
+                uiState.value = CharacterLoaded()
+            } catch (error: Throwable) {
+                uiState.value = InitializationError()
+            }
         }
     }
 
     fun loadCharacter(characterId: String) {
-        if (getCharacter(characterId) != null) {
-            return
-        }
-        if (!uiState.value.isLoading) {
+        if (!uiState.value.isBusy) {
+            if (getCharacter(characterId) != null) {
+                return
+            }
+            if (characterFailedToFetch(characterId)) {
+                return
+            }
             uiState.value = FetchingNewCharacter(characterId)
             viewModelScope.launch {
                 swapiService.loadCharacterById(characterId)
-                uiState.value = Loaded()
+                uiState.value = CharacterLoaded()
             }
         }
     }
@@ -48,14 +59,14 @@ class SwApiViewModel : ViewModel() {
 
 sealed class SwApiUiState {
     data class Idle(val idle: Boolean = true) : SwApiUiState()
-    class Loading(val loading: Boolean = true) : SwApiUiState()
+    data class Initializing(val loading: Boolean = true) : SwApiUiState()
     data class FetchingNewCharacter(val characterId: String) : SwApiUiState()
-    data class Loaded(val loaded: Boolean = true) : SwApiUiState()
-    data class Error(val error: Boolean = true) : SwApiUiState()
+    data class CharacterLoaded(val loaded: Boolean = true) : SwApiUiState()
+    data class InitializationError(val error: Boolean = true) : SwApiUiState()
 
-    val isLoading: Boolean
+    val isBusy: Boolean
         get() = when (this) {
-            is Loading, is FetchingNewCharacter -> true
+            is FetchingNewCharacter -> true
             else -> false
         }
 }

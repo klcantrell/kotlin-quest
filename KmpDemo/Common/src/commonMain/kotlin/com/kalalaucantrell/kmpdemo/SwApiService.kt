@@ -7,13 +7,16 @@ class SwApiService {
     private val api = SwApi()
 
     private val characterData = mutableMapOf<String, Character>()
+    private val failedCharacters = mutableSetOf<String>()
     private var count = 0
 
     @Throws(Throwable::class)
     suspend fun loadInitialData() {
         count = api.getAllCharacters().count
-        val initialCharacter = api.getCharacterById("1")
-        characterData["1"] = Character("1", initialCharacter.name, emptyList())
+        for (i in 1..5) {
+            val character = api.getCharacterById(i.toString())
+            characterData[i.toString()] = Character(i.toString(), character.name, emptyList())
+        }
     }
 
     fun getCharacterCount(): Int {
@@ -24,18 +27,26 @@ class SwApiService {
         return characterData[characterId]
     }
 
+    fun characterFailedToFetch(characterId: String): Boolean {
+        return failedCharacters.contains(characterId)
+    }
+
     @Throws(Throwable::class)
-    suspend fun loadCharacterById(characterId: String): Character {
+    suspend fun loadCharacterById(characterId: String) {
         if (characterData[characterId] != null) {
-            return characterData[characterId]!!
+            return
         }
-        val apiCharacter = api.getCharacterById(characterId)
-        val character = Character(
-            characterId,
-            apiCharacter.name,
-            emptyList()
-        )
-        characterData[characterId] = character
-        return character
+        try {
+            val apiCharacter = api.getCharacterById(characterId)
+            val character = Character(
+                characterId,
+                apiCharacter.name,
+                emptyList()
+            )
+            characterData[characterId] = character
+            return
+        } catch (error: Throwable) {
+            failedCharacters.add(characterId)
+        }
     }
 }

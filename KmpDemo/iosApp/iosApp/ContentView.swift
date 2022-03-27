@@ -3,13 +3,20 @@ import Common
 
 struct ContentView: View {
     @StateObject var viewModel = SwApiViewModel()
+    @State var selection = 1
     
     var body: some View {
         switch viewModel.state {
-        case .idle, .loading: Text("Loading...")
-        case .error: Text("Ah, something went wrong. Try again later.")
-        case .fetchingNewCharacter, .loaded:
-            TabView {
+        case .idle, .initializing:
+            ProgressView()
+                .progressViewStyle(CircularProgressViewStyle(tint: .blue))
+                .scaleEffect(2)
+        case .initializationError:
+            Text("Something went wrong loading the app. Please try again later.")
+                .padding(.horizontal, 64)
+                .multilineTextAlignment(.center)
+        default:
+            TabView(selection: $selection) {
                 ForEach(1..<viewModel.characterCount) { id in
                     CharacterView(
                         state: viewModel.state,
@@ -17,7 +24,7 @@ struct ContentView: View {
                         onAppear: {
                             viewModel.loadCharacter(String(id))
                         }
-                    )
+                    ).tag(id)
                 }
             }
             .tabViewStyle(.page)
