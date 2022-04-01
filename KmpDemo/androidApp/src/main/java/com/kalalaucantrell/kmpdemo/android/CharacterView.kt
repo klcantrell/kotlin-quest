@@ -6,7 +6,7 @@ import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -68,6 +68,7 @@ fun CharacterCard(character: Character) {
             contentDescription = "Image for character ${character.id}",
             contentScale = ContentScale.Crop,
             modifier = Modifier
+                .align(Alignment.CenterHorizontally)
                 .height(300.dp)
                 .width(300.dp)
                 .clip(RoundedCornerShape(10.dp))
@@ -75,7 +76,8 @@ fun CharacterCard(character: Character) {
         Spacer(Modifier.height(10.dp))
         Text(
             character.name,
-            modifier = Modifier.align(CenterHorizontally)
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center
         )
     }
 }
