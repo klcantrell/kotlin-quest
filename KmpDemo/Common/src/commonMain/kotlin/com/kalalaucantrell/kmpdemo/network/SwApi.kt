@@ -24,6 +24,10 @@ class SwApi {
     suspend fun getCharacterById(characterId: String): ApiCharacter {
         return httpClient.get("${Constants.BASE_API_URL}/people/${characterId}")
     }
+
+    suspend fun getAllMovies(): ApiMovieList {
+        return httpClient.get("${Constants.BASE_API_URL}/films")
+    }
 }
 
 object Constants {

@@ -3,4 +3,4 @@ package com.kalalaucantrell.kmpdemo.network
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ApiCharacter(val name: String, val films: List<String>)
+data class ApiMovieList(val count: Int, val results: List<ApiMovie>)

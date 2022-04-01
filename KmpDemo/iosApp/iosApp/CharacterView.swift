@@ -75,6 +75,12 @@ struct CharacterCard: View {
                     .frame(height: 10)
                 
                 Text(character.name)
+                
+                Spacer()
+                    .frame(height: 10)
+                
+                Text("Appears in: \(character.appearsIn.joined(separator: ", "))")
+                    .padding(.horizontal, 32)
             }
         } else {
             VStack {
