@@ -79,5 +79,11 @@ fun CharacterCard(character: Character) {
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center
         )
+        Spacer(Modifier.height(10.dp))
+        Text(
+            "Appears in: ${character.appearsIn.joinToString(", ")}",
+            modifier = Modifier
+                .padding(horizontal = 32.dp),
+        )
     }
 }
