@@ -39,7 +39,7 @@ struct CharacterCard: View {
     let character: Character
     
     func cacheAndRender(image: Image, url: URL) -> some View {
-        ImageCache[url] = image
+        ImageCache.cacheImage(url: url)
         return image
             .resizable()
             .scaledToFill()
@@ -51,7 +51,7 @@ struct CharacterCard: View {
             
             VStack {
                 if let cachedImage = ImageCache[url] {
-                    cachedImage
+                    Image(uiImage: cachedImage)
                         .resizable()
                         .scaledToFill()
                         .frame(width: 300, height: 300, alignment: .center)
@@ -98,13 +98,21 @@ struct CharacterCard: View {
 }
 
 fileprivate class ImageCache {
-    static private var cache: [URL: Image] = [:]
-    static subscript(url: URL) -> Image? {
-        get {
-            ImageCache.cache[url]
+    static private let cache = NSCache<NSString, UIImage>()
+    
+    static func cacheImage(url: URL) {
+        let dataTask = URLSession.shared.dataTask(with: url) { data, _, error in
+            guard let data = data, error == nil else {
+                return
+            }
+            ImageCache.cache.setObject(UIImage(data: data) ?? UIImage(named: "empire-emblem")!, forKey: url.absoluteString as NSString)
         }
-        set {
-            ImageCache.cache[url] = newValue
+        dataTask.resume()
+    }
+    
+    static subscript(url: URL) -> UIImage? {
+        get {
+            ImageCache.cache.object(forKey: url.absoluteString as NSString)
         }
     }
 }

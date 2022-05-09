@@ -18,7 +18,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kalalaucantrell.kmpdemo.android.SwApiUiState.CharacterLoaded
 import com.kalalaucantrell.kmpdemo.android.SwApiUiState.FetchingNewCharacter
-import com.kalalaucantrell.kmpdemo.network.Character
+import com.kalalaucantrell.kmpdemo.models.Character
 
 @Composable
 fun CharacterView(state: SwApiUiState, character: Character?, onAppear: () -> Unit) {

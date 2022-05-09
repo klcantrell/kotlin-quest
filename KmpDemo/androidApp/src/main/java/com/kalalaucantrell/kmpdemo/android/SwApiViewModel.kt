@@ -4,7 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kalalaucantrell.kmpdemo.SwApiService
 import com.kalalaucantrell.kmpdemo.android.SwApiUiState.*
-import com.kalalaucantrell.kmpdemo.network.Character
+import com.kalalaucantrell.kmpdemo.models.Character
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 
