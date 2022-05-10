@@ -1,5 +1,6 @@
 package com.example.flickrbrowser
 
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -13,7 +14,8 @@ import com.example.flickrbrowser.databinding.ActivityMainBinding
 
 private const val TAG = "MainActivity"
 
-class MainActivity : AppCompatActivity(), GetRawData.OnDownloadComplete {
+class MainActivity : AppCompatActivity(), GetRawData.OnDownloadComplete,
+    GetFlickrJsonData.OnDataAvailable {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
@@ -27,13 +29,35 @@ class MainActivity : AppCompatActivity(), GetRawData.OnDownloadComplete {
 
         setSupportActionBar(binding.toolbar)
 
+        val url = createUri(
+            "https://www.flickr.com/services/feeds/photos_public.gne",
+            searchCriteria = "android"
+        )
         val getRawData = GetRawData(this)
-        getRawData.execute("https://www.flickr.com/services/feeds/photos_public.gne?tags=android&format=json&nojsoncallback=1")
+        getRawData.execute(url)
 
         val navController = findNavController(R.id.nav_host_fragment_content_main)
         appBarConfiguration = AppBarConfiguration(navController.graph)
         setupActionBarWithNavController(navController, appBarConfiguration)
         Log.d(TAG, "onCreate ends")
+    }
+
+    private fun createUri(
+        baseUrl: String,
+        searchCriteria: String,
+        lang: String = "en-us",
+        matchAll: Boolean = true
+    ): String {
+        Log.d(TAG, "createUri starts")
+        return Uri.parse(baseUrl)
+            .buildUpon()
+            .appendQueryParameter("tags", searchCriteria)
+            .appendQueryParameter("tagmode", if (matchAll) "ALL" else "ANY")
+            .appendQueryParameter("lang", lang)
+            .appendQueryParameter("format", "json")
+            .appendQueryParameter("nojsoncallback", "1")
+            .build()
+            .toString()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -62,11 +86,24 @@ class MainActivity : AppCompatActivity(), GetRawData.OnDownloadComplete {
 
     override fun onDownloadComplete(data: String, status: DownloadStatus) {
         when (status) {
-            DownloadStatus.OK -> Log.d(TAG, "onDownloadComplete called, data is $data")
+            DownloadStatus.OK -> {
+                Log.d(TAG, "onDownloadComplete called")
+                val getFlickrJsonData = GetFlickrJsonData(this)
+                getFlickrJsonData.execute(data)
+            }
             else -> Log.d(
                 TAG,
                 "onDownloadComplete failed with status $status, error message is $data"
             )
         }
+    }
+
+    override fun onDataAvailable(data: List<Photo>) {
+        Log.d(TAG, "onDataAvailable starts, data is $data")
+        Log.d(TAG, "onDataAvailable ends, data is $data")
+    }
+
+    override fun onError(exception: Exception) {
+        Log.e(TAG, "onError starts, error is ${exception.message}")
     }
 }
