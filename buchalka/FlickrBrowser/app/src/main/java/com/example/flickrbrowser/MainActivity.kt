@@ -6,10 +6,7 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.findNavController
 import androidx.navigation.ui.AppBarConfiguration
-import androidx.navigation.ui.navigateUp
-import androidx.navigation.ui.setupActionBarWithNavController
 import com.example.flickrbrowser.databinding.ActivityMainBinding
 
 private const val TAG = "MainActivity"
@@ -36,9 +33,6 @@ class MainActivity : AppCompatActivity(), GetRawData.OnDownloadComplete,
         val getRawData = GetRawData(this)
         getRawData.execute(url)
 
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        appBarConfiguration = AppBarConfiguration(navController.graph)
-        setupActionBarWithNavController(navController, appBarConfiguration)
         Log.d(TAG, "onCreate ends")
     }
 
@@ -76,12 +70,6 @@ class MainActivity : AppCompatActivity(), GetRawData.OnDownloadComplete,
             R.id.action_settings -> true
             else -> super.onOptionsItemSelected(item)
         }
-    }
-
-    override fun onSupportNavigateUp(): Boolean {
-        val navController = findNavController(R.id.nav_host_fragment_content_main)
-        return navController.navigateUp(appBarConfiguration)
-                || super.onSupportNavigateUp()
     }
 
     override fun onDownloadComplete(data: String, status: DownloadStatus) {
