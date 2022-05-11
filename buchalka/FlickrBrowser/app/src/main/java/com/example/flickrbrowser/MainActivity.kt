@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.ui.AppBarConfiguration
 import com.example.flickrbrowser.databinding.ActivityMainBinding
 
 private const val TAG = "MainActivity"
@@ -14,7 +13,6 @@ private const val TAG = "MainActivity"
 class MainActivity : AppCompatActivity(), GetRawData.OnDownloadComplete,
     GetFlickrJsonData.OnDataAvailable {
 
-    private lateinit var appBarConfiguration: AppBarConfiguration
     private lateinit var binding: ActivityMainBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
